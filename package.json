@@ -1,0 +1,36 @@
+{
+  "name": "genflow",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.19.0",
+  "engines": {
+    "node": ">=20.9.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "build": "pnpm run build:packages && pnpm --filter @genflow/api build && pnpm --filter @genflow/execution-worker build && pnpm --filter @genflow/web build",
+    "build:packages": "pnpm --filter @genflow/workflow-types build && pnpm --filter @genflow/shared build && pnpm --filter @genflow/validation build && pnpm --filter @genflow/provider-sdk build && pnpm --filter @genflow/workflow-core build && pnpm --filter @genflow/database build && pnpm --filter @genflow/asset-storage build",
+    "dev": "pnpm --parallel --filter @genflow/api --filter @genflow/execution-worker --filter @genflow/web dev",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "lint": "pnpm -r --if-present lint",
+    "test": "pnpm run build:packages && pnpm -r --if-present test",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "setup:env": "node scripts/setup-env.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:generate": "pnpm --filter @genflow/database db:generate",
+    "db:migrate": "pnpm --filter @genflow/database db:migrate"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.36.0",
+    "@types/node": "^24.3.0",
+    "eslint": "^9.36.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^16.3.0",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.42.0",
+    "vitest": "^3.2.4"
+  }
+}

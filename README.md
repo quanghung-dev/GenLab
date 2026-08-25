@@ -18,7 +18,7 @@ The repository implements a real vertical-slice MVP rather than a static editor 
 ## Quick start
 
 ```bash
-cp .env.example .env
+pnpm setup:env
 docker compose up -d
 pnpm install
 pnpm db:migrate
@@ -30,6 +30,9 @@ Open `http://localhost:3000`. The API listens on `http://localhost:4000`.
 Mock mode is enabled by default. It exercises the same provider interfaces as real adapters
 without paid credentials. Set `COMFYUI_BASE_URL` and disable mock mode to register a ComfyUI
 instance.
+
+`pnpm setup:env` creates an ignored local `.env` with cryptographically random development
+credentials. It refuses to overwrite an existing file unless you pass `--force`.
 
 ## Quality gates
 
