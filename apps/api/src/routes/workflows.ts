@@ -32,15 +32,17 @@ export function registerWorkflowRoutes(
   repository: GenFlowRepository,
   queue: ExecutionQueue,
 ): void {
+  const authenticate = app.authenticate.bind(app);
+
   app.get<{ Params: { projectId: string } }>(
     '/api/projects/:projectId/workflows',
-    { onRequest: [app.authenticate] },
+    { onRequest: [authenticate] },
     async (request) => success(await repository.listWorkflows(request.identity, request.params.projectId), request.id),
   );
 
   app.post<{ Params: { projectId: string } }>(
     '/api/projects/:projectId/workflows',
-    { onRequest: [app.authenticate] },
+    { onRequest: [authenticate] },
     async (request, reply) => {
       requireEditor(request.identity.role);
       const input = workflowCreateSchema.parse(request.body);
@@ -63,20 +65,20 @@ export function registerWorkflowRoutes(
 
   app.get<{ Params: { workflowId: string } }>(
     '/api/workflows/:workflowId',
-    { onRequest: [app.authenticate] },
+    { onRequest: [authenticate] },
     async (request) => success(await repository.getWorkflow(request.identity, request.params.workflowId), request.id),
   );
 
   app.get<{ Params: { workflowId: string } }>(
     '/api/workflows/:workflowId/versions',
-    { onRequest: [app.authenticate] },
+    { onRequest: [authenticate] },
     async (request) =>
       success(await repository.listWorkflowVersions(request.identity, request.params.workflowId), request.id),
   );
 
   app.post<{ Params: { workflowId: string } }>(
     '/api/workflows/:workflowId/versions',
-    { onRequest: [app.authenticate] },
+    { onRequest: [authenticate] },
     async (request, reply) => {
       requireEditor(request.identity.role);
       const input = workflowVersionCreateSchema.parse(request.body);
@@ -92,7 +94,7 @@ export function registerWorkflowRoutes(
 
   app.post<{ Params: { workflowId: string } }>(
     '/api/workflows/:workflowId/validate',
-    { onRequest: [app.authenticate] },
+    { onRequest: [authenticate] },
     async (request) => {
       await repository.getWorkflow(request.identity, request.params.workflowId);
       const input = workflowValidationRequestSchema.parse(request.body);
@@ -102,7 +104,7 @@ export function registerWorkflowRoutes(
 
   app.post<{ Params: { workflowId: string } }>(
     '/api/workflows/:workflowId/executions',
-    { onRequest: [app.authenticate] },
+    { onRequest: [authenticate] },
     async (request, reply) => {
       requireEditor(request.identity.role);
       const input = executionCreateSchema.parse(request.body);
@@ -140,10 +142,10 @@ export function registerWorkflowRoutes(
     },
   );
 
-  app.get('/api/templates', { onRequest: [app.authenticate] }, async (request) =>
+  app.get('/api/templates', { onRequest: [authenticate] }, (request) =>
     success(workflowTemplates, request.id),
   );
-  app.get('/api/node-definitions', { onRequest: [app.authenticate] }, async (request) =>
+  app.get('/api/node-definitions', { onRequest: [authenticate] }, (request) =>
     success(
       nodeRegistry.list().map(({ configSchema, ...definition }) => ({
         ...definition,

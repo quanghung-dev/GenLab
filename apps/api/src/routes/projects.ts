@@ -10,11 +10,13 @@ function requireEditor(role: string): void {
 }
 
 export function registerProjectRoutes(app: FastifyInstance, repository: GenFlowRepository): void {
-  app.get('/api/projects', { onRequest: [app.authenticate] }, async (request) => {
+  const authenticate = app.authenticate.bind(app);
+
+  app.get('/api/projects', { onRequest: [authenticate] }, async (request) => {
     return success(await repository.listProjects(request.identity), request.id);
   });
 
-  app.post('/api/projects', { onRequest: [app.authenticate] }, async (request, reply) => {
+  app.post('/api/projects', { onRequest: [authenticate] }, async (request, reply) => {
     requireEditor(request.identity.role);
     const input = projectCreateSchema.parse(request.body);
     const project = await repository.createProject(request.identity, {
@@ -26,7 +28,7 @@ export function registerProjectRoutes(app: FastifyInstance, repository: GenFlowR
 
   app.patch<{ Params: { projectId: string } }>(
     '/api/projects/:projectId',
-    { onRequest: [app.authenticate] },
+    { onRequest: [authenticate] },
     async (request) => {
       requireEditor(request.identity.role);
       const input = projectUpdateSchema.parse(request.body);
@@ -40,7 +42,7 @@ export function registerProjectRoutes(app: FastifyInstance, repository: GenFlowR
 
   app.delete<{ Params: { projectId: string } }>(
     '/api/projects/:projectId',
-    { onRequest: [app.authenticate] },
+    { onRequest: [authenticate] },
     async (request, reply) => {
       requireEditor(request.identity.role);
       await repository.deleteProject(request.identity, request.params.projectId);

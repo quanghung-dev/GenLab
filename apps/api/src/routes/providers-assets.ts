@@ -10,20 +10,22 @@ export function registerProviderAndAssetRoutes(
   providers: ProviderRegistry,
   storage: AssetStorage,
 ): void {
-  app.get('/api/providers', { onRequest: [app.authenticate] }, async (request) =>
+  const authenticate = app.authenticate.bind(app);
+
+  app.get('/api/providers', { onRequest: [authenticate] }, (request) =>
     success(providers.list(), request.id),
   );
 
   app.get<{ Params: { providerId: string } }>(
     '/api/providers/:providerId/models',
-    { onRequest: [app.authenticate] },
-    async (request) => success(providers.get(request.params.providerId).models, request.id),
+    { onRequest: [authenticate] },
+    (request) => success(providers.get(request.params.providerId).models, request.id),
   );
 
   app.post<{ Params: { providerId: string } }>(
     '/api/providers/:providerId/test',
-    { onRequest: [app.authenticate] },
-    async (request) => {
+    { onRequest: [authenticate] },
+    (request) => {
       const provider = providers.get(request.params.providerId);
       return success({ ok: provider.enabled, capabilities: Object.keys(provider.handlers) }, request.id);
     },
@@ -31,20 +33,20 @@ export function registerProviderAndAssetRoutes(
 
   app.get<{ Querystring: { projectId?: string } }>(
     '/api/assets',
-    { onRequest: [app.authenticate] },
+    { onRequest: [authenticate] },
     async (request) =>
       success(await repository.listAssets(request.identity, request.query.projectId), request.id),
   );
 
   app.get<{ Params: { assetId: string } }>(
     '/api/assets/:assetId',
-    { onRequest: [app.authenticate] },
+    { onRequest: [authenticate] },
     async (request) => success(await repository.getAsset(request.identity, request.params.assetId), request.id),
   );
 
   app.get<{ Params: { assetId: string } }>(
     '/api/assets/:assetId/content',
-    { onRequest: [app.authenticate] },
+    { onRequest: [authenticate] },
     async (request, reply) => {
       const asset = await repository.getAsset(request.identity, request.params.assetId);
       if (asset.sizeBytes > 100 * 1024 * 1024) {

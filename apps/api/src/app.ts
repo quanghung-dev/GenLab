@@ -60,7 +60,7 @@ export async function buildApp(dependencies: ApiDependencies): Promise<FastifyIn
     }
   });
 
-  app.get('/api/health', async (request) => ({
+  app.get('/api/health', (request) => ({
     data: { status: 'ok', version: '0.1.0' },
     meta: { requestId: request.id },
   }));
