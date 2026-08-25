@@ -1,4 +1,4 @@
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import type { ExecutionEvent } from '@genflow/workflow-types';
 
 export class EventBroker {

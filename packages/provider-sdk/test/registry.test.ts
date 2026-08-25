@@ -9,7 +9,7 @@ describe('ProviderRegistry', () => {
 
     const provider = registry.resolve('mock', 'text.generate');
 
-    expect(provider.generateText).toBeTypeOf('function');
+    expect(Reflect.get(provider, 'generateText')).toBeTypeOf('function');
   });
 
   it('rejects an unsupported capability with a stable error code', () => {
@@ -28,8 +28,14 @@ describe('ProviderRegistry', () => {
     const registry = new ProviderRegistry();
     registry.register(createMockProvider());
 
-    expect(() => registry.register(createMockProvider())).toThrowError(
-      expect.objectContaining({ code: 'CONFLICT' }),
-    );
+    try {
+      registry.register(createMockProvider());
+    } catch (error) {
+      expect(error).toBeInstanceOf(AppError);
+      if (!(error instanceof AppError)) throw error;
+      expect(error.code).toBe('CONFLICT');
+      return;
+    }
+    throw new Error('Expected duplicate provider registration to fail.');
   });
 });

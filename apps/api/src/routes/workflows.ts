@@ -80,7 +80,11 @@ export function registerWorkflowRoutes(
     async (request, reply) => {
       requireEditor(request.identity.role);
       const input = workflowVersionCreateSchema.parse(request.body);
-      const saved = await repository.saveWorkflowVersion(request.identity, request.params.workflowId, input);
+      const saved = await repository.saveWorkflowVersion(request.identity, request.params.workflowId, {
+        graph: input.graph,
+        expectedVersion: input.expectedVersion,
+        ...(input.changeSummary === undefined ? {} : { changeSummary: input.changeSummary }),
+      });
       const validation = validateWorkflow(input.graph, nodeRegistry);
       return reply.code(201).send(success({ version: saved, validation }, request.id));
     },

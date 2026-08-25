@@ -17,7 +17,11 @@ export function registerProjectRoutes(app: FastifyInstance, repository: GenFlowR
   app.post('/api/projects', { onRequest: [app.authenticate] }, async (request, reply) => {
     requireEditor(request.identity.role);
     const input = projectCreateSchema.parse(request.body);
-    return reply.code(201).send(success(await repository.createProject(request.identity, input), request.id));
+    const project = await repository.createProject(request.identity, {
+      name: input.name,
+      ...(input.description === undefined ? {} : { description: input.description }),
+    });
+    return reply.code(201).send(success(project, request.id));
   });
 
   app.patch<{ Params: { projectId: string } }>(
@@ -26,7 +30,11 @@ export function registerProjectRoutes(app: FastifyInstance, repository: GenFlowR
     async (request) => {
       requireEditor(request.identity.role);
       const input = projectUpdateSchema.parse(request.body);
-      return success(await repository.updateProject(request.identity, request.params.projectId, input), request.id);
+      const project = await repository.updateProject(request.identity, request.params.projectId, {
+        ...(input.name === undefined ? {} : { name: input.name }),
+        ...(input.description === undefined ? {} : { description: input.description }),
+      });
+      return success(project, request.id);
     },
   );
 

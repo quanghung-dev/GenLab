@@ -1,4 +1,4 @@
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import type { ExecutionEvent } from '@genflow/workflow-types';
 
 function channel(executionId: string): string {
@@ -24,7 +24,7 @@ export class EventBroker {
   ): Promise<() => Promise<void>> {
     const subscriber = new Redis(this.#redisUrl, { maxRetriesPerRequest: null });
     const eventChannel = channel(executionId);
-    subscriber.on('message', (receivedChannel, payload) => {
+    subscriber.on('message', (receivedChannel: string, payload: string) => {
       if (receivedChannel !== eventChannel) return;
       try {
         listener(JSON.parse(payload) as ExecutionEvent);
