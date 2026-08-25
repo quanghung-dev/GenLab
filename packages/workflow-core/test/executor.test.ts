@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import type { NodeHandler } from '../src/executor.js';
 import { createDefaultNodeRegistry, WorkflowExecutor } from '../src/index.js';
 import type { WorkflowGraph } from '@genflow/workflow-types';
@@ -19,21 +19,37 @@ describe('WorkflowExecutor', () => {
       ],
     };
     const handlers = new Map<string, NodeHandler>([
-      ['input.text', { execute: vi.fn(async () => ({ text: 'hello' })) }],
+      ['input.text', { execute: () => Promise.resolve({ text: 'hello' }) }],
       [
         'ai.text.generate',
         {
-          execute: vi.fn(async ({ inputs }) => ({ text: `${String(inputs.prompt)} world` })),
+          execute: ({ inputs }) => {
+            const prompt = inputs.prompt;
+            if (typeof prompt !== 'string') return Promise.reject(new Error('Expected text prompt.'));
+            return Promise.resolve({ text: `${prompt} world` });
+          },
         },
       ],
-      ['output.text', { execute: vi.fn(async ({ inputs }) => ({ text: inputs.text as string })) }],
+      [
+        'output.text',
+        {
+          execute: ({ inputs }) => {
+            const text = inputs.text;
+            if (typeof text !== 'string') return Promise.reject(new Error('Expected text output.'));
+            return Promise.resolve({ text });
+          },
+        },
+      ],
     ]);
     const executor = new WorkflowExecutor(createDefaultNodeRegistry(), handlers);
     const result = await executor.execute({
       executionId: crypto.randomUUID(),
       graph,
       signal: new AbortController().signal,
-      observer: { onEvent: vi.fn(async () => undefined), onNodeState: vi.fn(async () => undefined) },
+      observer: {
+        onEvent: () => Promise.resolve(),
+        onNodeState: () => Promise.resolve(),
+      },
     });
 
     expect(result.terminalOutputs.output).toEqual({ text: 'hello world' });

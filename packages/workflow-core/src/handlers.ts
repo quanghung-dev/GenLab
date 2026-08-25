@@ -51,9 +51,9 @@ function jsonParameters(value: Record<string, unknown>): Readonly<Record<string,
 export function createBuiltInHandlers(dependencies: BuiltInHandlerDependencies): ReadonlyMap<string, NodeHandler> {
   const handlers = new Map<string, NodeHandler>();
   handlers.set('input.text', {
-    execute: async ({ node }): Promise<NodeOutputMap> => {
+    execute: ({ node }): Promise<NodeOutputMap> => {
       const config = inputTextConfigSchema.parse(node.config);
-      return { text: config.value };
+      return Promise.resolve({ text: config.value });
     },
   });
   handlers.set('ai.text.generate', {
@@ -139,22 +139,23 @@ export function createBuiltInHandlers(dependencies: BuiltInHandlerDependencies):
     },
   });
   handlers.set('output.text', {
-    execute: async ({ inputs }): Promise<NodeOutputMap> => ({ text: requiredString(inputs.text, 'Text') }),
+    execute: ({ inputs }): Promise<NodeOutputMap> =>
+      Promise.resolve({ text: requiredString(inputs.text, 'Text') }),
   });
   handlers.set('output.asset', {
-    execute: async ({ inputs }): Promise<NodeOutputMap> => {
+    execute: ({ inputs }): Promise<NodeOutputMap> => {
       const value = inputs.asset;
       if (!value || Array.isArray(value) || typeof value !== 'object' || !('assetId' in value)) {
         throw new AppError({ code: 'INVALID_INPUT', message: 'Asset output requires an asset.', statusCode: 422 });
       }
-      return { asset: value };
+      return Promise.resolve({ asset: value });
     },
   });
   return handlers;
 }
 
 export class EmptyCredentialResolver implements CredentialResolver {
-  async resolve(): Promise<Readonly<Record<string, string>>> {
-    return {};
+  resolve(): Promise<Readonly<Record<string, string>>> {
+    return Promise.resolve({});
   }
 }
