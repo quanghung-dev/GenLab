@@ -1,10 +1,11 @@
 import { z } from 'zod';
 import { workflowGraphSchema } from '@genflow/workflow-types';
 
-const environmentBoolean = z
-  .enum(['true', 'false'])
-  .default('false')
-  .transform((value) => value === 'true');
+const environmentBoolean = (defaultValue = false) =>
+  z
+    .enum(['true', 'false'])
+    .default(defaultValue ? 'true' : 'false')
+    .transform((value) => value === 'true');
 
 const commonEnvironmentSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -19,10 +20,10 @@ const commonEnvironmentSchema = z.object({
   S3_BUCKET: z.string().min(1).default('genflow'),
   S3_ACCESS_KEY_ID: z.string().optional(),
   S3_SECRET_ACCESS_KEY: z.string().optional(),
-  S3_FORCE_PATH_STYLE: environmentBoolean.default('true'),
-  MOCK_MODE: environmentBoolean.default('true'),
+  S3_FORCE_PATH_STYLE: environmentBoolean(true),
+  MOCK_MODE: environmentBoolean(true),
   COMFYUI_BASE_URL: z.string().url().optional().or(z.literal('')),
-  COMFYUI_ALLOW_PRIVATE_NETWORK: environmentBoolean,
+  COMFYUI_ALLOW_PRIVATE_NETWORK: environmentBoolean(),
 });
 
 export const apiEnvironmentSchema = commonEnvironmentSchema.extend({
