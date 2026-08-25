@@ -3,7 +3,9 @@ import type { PoolClient, QueryResult, QueryResultRow } from 'pg';
 
 const { Pool } = pg;
 
-export type Queryable = Pick<PoolClient, 'query'>;
+export interface Queryable {
+  query<R extends QueryResultRow>(text: string, values?: readonly unknown[]): Promise<QueryResult<R>>;
+}
 
 export class Database {
   readonly #pool: pg.Pool;
