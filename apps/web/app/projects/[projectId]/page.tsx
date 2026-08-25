@@ -10,6 +10,7 @@ import { AppShell, PageHeader } from '@/components/app-shell';
 import { Badge, Button, EmptyState, Input, LoadingBlock } from '@/components/ui';
 import { apiRequest, type WorkflowDto } from '@/lib/api';
 import { formatRelativeDate } from '@/lib/format';
+import { formString } from '@/lib/forms';
 
 export default function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -27,9 +28,9 @@ export default function ProjectDetailPage() {
   function submit(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const description = String(data.get('description') ?? '').trim();
-    const templateId = String(data.get('templateId') ?? '').trim();
-    createWorkflow.mutate({ name: String(data.get('name') ?? '').trim(), ...(description ? { description } : {}), ...(templateId ? { templateId } : {}) });
+    const description = formString(data, 'description');
+    const templateId = formString(data, 'templateId');
+    createWorkflow.mutate({ name: formString(data, 'name'), ...(description ? { description } : {}), ...(templateId ? { templateId } : {}) });
   }
 
   return (

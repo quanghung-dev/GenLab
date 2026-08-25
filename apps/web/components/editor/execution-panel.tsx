@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown, ChevronUp, CircleStop, RotateCcw, TerminalSquare, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, CircleStop, RotateCcw, TerminalSquare } from 'lucide-react';
 import type { ExecutionEvent } from '@genflow/workflow-types';
 import { Badge, Button } from '@/components/ui';
 

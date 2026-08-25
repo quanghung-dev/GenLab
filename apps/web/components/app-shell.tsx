@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   Boxes,
-  ChevronDown,
   FolderKanban,
   Gauge,
   LogOut,

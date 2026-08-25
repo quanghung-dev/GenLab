@@ -10,7 +10,6 @@ import {
   ReactFlow,
   ReactFlowProvider,
   useReactFlow,
-  type Connection,
   type Edge,
   type IsValidConnection,
   type Node,
@@ -22,12 +21,10 @@ import {
   Check,
   ChevronRight,
   Cloud,
-  Copy,
   Play,
   Redo2,
   Save,
   Undo2,
-  ZoomIn,
 } from 'lucide-react';
 import {
   useCallback,
@@ -307,7 +304,11 @@ export function WorkflowEditor({ projectId, workflowId }: { projectId: string; w
       if (target?.matches('input, textarea, select, [contenteditable="true"]')) return;
       const command = event.metaKey || event.ctrlKey;
       if (command && event.key.toLowerCase() === 's') { event.preventDefault(); if (dirty && !save.isPending) save.mutate(); }
-      if (command && event.key.toLowerCase() === 'z') { event.preventDefault(); event.shiftKey ? redo() : undo(); }
+      if (command && event.key.toLowerCase() === 'z') {
+        event.preventDefault();
+        if (event.shiftKey) redo();
+        else undo();
+      }
       if (command && event.key.toLowerCase() === 'y') { event.preventDefault(); redo(); }
       if (command && event.key.toLowerCase() === 'c') copiedNodeId = useEditorStore.getState().selectedNodeId;
       if (command && event.key.toLowerCase() === 'v' && copiedNodeId) { event.preventDefault(); useEditorStore.getState().selectNode(copiedNodeId); duplicate(); }

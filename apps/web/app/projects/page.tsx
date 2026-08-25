@@ -8,6 +8,7 @@ import { AppShell, PageHeader } from '@/components/app-shell';
 import { Button, EmptyState, Input, LoadingBlock } from '@/components/ui';
 import { apiRequest, type ProjectDto } from '@/lib/api';
 import { formatRelativeDate } from '@/lib/format';
+import { formString } from '@/lib/forms';
 
 export default function ProjectsPage() {
   const queryClient = useQueryClient();
@@ -23,8 +24,8 @@ export default function ProjectsPage() {
   function submit(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const description = String(data.get('description') ?? '').trim();
-    createProject.mutate({ name: String(data.get('name') ?? '').trim(), ...(description ? { description } : {}) });
+    const description = formString(data, 'description');
+    createProject.mutate({ name: formString(data, 'name'), ...(description ? { description } : {}) });
   }
 
   return (
