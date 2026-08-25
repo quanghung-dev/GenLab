@@ -7,7 +7,7 @@ import {
   textGenerationConfigSchema,
   videoGenerationConfigSchema,
 } from './definitions.js';
-import type { NodeExecutionContext, NodeHandler } from './executor.js';
+import type { NodeHandler } from './executor.js';
 
 export interface AssetWriter {
   write(
@@ -113,6 +113,7 @@ export function createBuiltInHandlers(dependencies: BuiltInHandlerDependencies):
       const config = videoGenerationConfigSchema.parse(context.node.config);
       const credentials = await dependencies.credentials.resolve(config.credentialId);
       const provider = dependencies.providers.resolve(config.providerId, 'video.generate');
+      const sourceImageAssetId = optionalAssetId(context.inputs.image);
       const artifact = await provider.generateVideo(
         {
           prompt: requiredString(context.inputs.prompt, 'Prompt'),
@@ -120,7 +121,7 @@ export function createBuiltInHandlers(dependencies: BuiltInHandlerDependencies):
           durationSeconds: config.durationSeconds,
           width: config.width,
           height: config.height,
-          sourceImageAssetId: optionalAssetId(context.inputs.image),
+          ...(sourceImageAssetId === undefined ? {} : { sourceImageAssetId }),
           ...(config.seed === undefined ? {} : { seed: config.seed }),
           parameters: jsonParameters(config.parameters),
         },
