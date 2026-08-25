@@ -1,5 +1,5 @@
 import type { AssetStorage } from '@genflow/asset-storage';
-import type { ExecutionRecord, GenFlowRepository, NodeExecutionUpdate } from '@genflow/database';
+import type { ExecutionRecord, GenFlowRepository } from '@genflow/database';
 import type { ProviderRegistry } from '@genflow/provider-sdk';
 import { toAppError } from '@genflow/shared';
 import type { ExecutionEvent } from '@genflow/workflow-types';
@@ -21,11 +21,11 @@ export interface ProcessExecutionDependencies {
   readonly maxParallelNodes: number;
 }
 
-async function observeCancellation(
+function observeCancellation(
   repository: GenFlowRepository,
   execution: ExecutionRecord,
   controller: AbortController,
-): Promise<() => void> {
+): () => void {
   const timer = setInterval(() => {
     void repository
       .getExecutionForWorker(execution.id, execution.workspaceId)
@@ -45,7 +45,7 @@ export async function processExecution(
   if (execution.status === 'CANCELLED' || execution.cancelRequestedAt) return;
   await dependencies.repository.markExecutionRunning(execution.id);
   const controller = new AbortController();
-  const stopObservingCancellation = await observeCancellation(dependencies.repository, execution, controller);
+  const stopObservingCancellation = observeCancellation(dependencies.repository, execution, controller);
   const registry = createDefaultNodeRegistry();
   const handlers = createBuiltInHandlers({
     providers: dependencies.providers,
@@ -74,11 +74,7 @@ export async function processExecution(
         },
         onNodeState: async (update) => {
           const nodeType = nodeTypes.get(update.nodeId) ?? 'unknown';
-          await dependencies.repository.upsertNodeExecution(
-            execution,
-            nodeType,
-            update as NodeExecutionUpdate,
-          );
+          await dependencies.repository.upsertNodeExecution(execution, nodeType, update);
         },
       },
     });
